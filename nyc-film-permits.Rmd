@@ -1,0 +1,40 @@
+---
+title: NYC Filming Permits
+output: github_document
+---
+
+## Load required package(s)
+```{r load-packages, message = FALSE}
+library(tidyverse)
+library(lubridate)
+```
+
+## Load dataset
+```{r data-import, message = FALSE}
+film_permits <- read_csv('film-permits.csv') %>% 
+    janitor::clean_names() %>% 
+    mutate(
+        start_date_time = mdy_hms(start_date_time),
+        end_date_time = mdy_hms(end_date_time),
+        entered_on = mdy_hms(entered_on),
+        permit_duration_mins = end_date_time - start_date_time)
+```
+
+```{r}
+head(film_permits)
+```
+
+
+```{r}
+film_permits %>% 
+    select(start_date_time, end_date_time, permit_duration_mins) %>% 
+    summarize(mean_mins = sum(permit_duration_mins)/n())
+```
+
+
+```{r test-code, eval = FALSE}
+    separate(
+        col = start_date_time,
+        into = c("date", "time"),
+        sep = " ")
+```
