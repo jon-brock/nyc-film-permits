@@ -3,6 +3,8 @@ title: NYC Filming Permits
 output: github_document
 ---
 
+Data available [here](https://data.cityofnewyork.us/City-Government/Film-Permits/tg4x-b46p). The data pulled for this analysis occurred on February 24, 2021.   
+
 ## Load required package(s)
 ```{r load-packages, message = FALSE}
 library(tidyverse)
@@ -17,24 +19,23 @@ film_permits <- read_csv('film-permits.csv') %>%
         start_date_time = mdy_hms(start_date_time),
         end_date_time = mdy_hms(end_date_time),
         entered_on = mdy_hms(entered_on),
-        permit_duration_mins = end_date_time - start_date_time)
+        permit_duration_mins = end_date_time - start_date_time) %>% 
+    select(-c(event_agency, parking_held))
 ```
 
 ```{r}
 head(film_permits)
 ```
 
+***  
 
 ```{r}
 film_permits %>% 
-    select(start_date_time, end_date_time, permit_duration_mins) %>% 
-    summarize(mean_mins = sum(permit_duration_mins)/n())
-```
-
-
-```{r test-code, eval = FALSE}
-    separate(
-        col = start_date_time,
-        into = c("date", "time"),
-        sep = " ")
+    select(event_type, start_date_time, end_date_time, permit_duration_mins) %>% 
+    group_by(event_type) %>% 
+    summarize(mean_mins = sum(permit_duration_mins)/n()) %>% 
+    mutate(mean_hours = mean_mins / dhours(1)) %>% 
+    knitr::kable(
+        align = 'lcc',
+        col.names = c("Event Type", "Average Permit Time (m)", "Average Permit Time (h)"))
 ```
